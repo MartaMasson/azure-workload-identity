@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "akvdotnet": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "KEYVAULT_URL": "https://azwi-kv-tutorial-mmg.vault.azure.net/",
+        "SECRET_NAME": "azwi-kv-tutorial-mmg",
+        "KEYVAULT_SECRET_NAME": "my-secret",
+        "AZURE_CLIENT_ID": "318e419b-82a0-4872-871c-ba2a0ce5a6e2",
+        "AZURE_TENANT_ID\"": "7fcb6604-4f46-4896-a652-8d975518c698",
+        "AZURE_FEDERATED_TOKEN_FILE": "system:serviceaccount:default:workload-identity-sa"
+      }
+    }
+  }
+}

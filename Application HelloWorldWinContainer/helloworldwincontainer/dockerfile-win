@@ -1,0 +1,44 @@
+# escape=`
+
+FROM --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019
+
+# Install OpenJDK 17
+RUN powershell.exe -Command  `
+    $ErrorActionPreference = 'Stop'; `
+    (New-Object System.Net.WebClient).DownloadFile('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip','c:\openjdk.zip') ; `
+    $ProgressPreference = 'SilentlyContinue'; `
+    Expand-Archive -Path c:\openjdk.zip -DestinationPath c:\; `
+    Remove-Item -Path c:\openjdk.zip
+
+# Install Maven 3.8.4
+RUN powershell.exe -Command `
+    $ErrorActionPreference = 'Stop'; `
+    (New-Object System.Net.WebClient).DownloadFile('https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.zip','c:\maven.zip') ; `
+    $ProgressPreference = 'SilentlyContinue'; `
+    Expand-Archive -Path c:\maven.zip -DestinationPath c:\; `
+    Remove-Item -Path c:\maven.zip
+
+# Adjusting the environment variables
+ENV JAVA_HOME="c:\jdk-17.0.1+12"
+ENV MAVEN_HOME="c:\apache-maven-3.9.5"
+RUN setx /M PATH "%PATH%;%JAVA_HOME%\bin;%MAVEN_HOME%\bin"
+RUN set
+
+# Set the working directory in the image
+WORKDIR c:/app
+
+# Copy the pom.xml file
+COPY pom.xml c:/app/pom.xml
+COPY src c:/app/src/
+
+# Build the Spring Boot application
+RUN mvn clean package
+
+# Copy the application's jar file
+COPY "target\helloworldwincontainer-0.0.1-SNAPSHOT.jar" "helloworldwincontainer.jar"
+
+# Expose the port the Spring Boot application runs on
+EXPOSE 8080
+
+# Run the Spring Boot application
+ENTRYPOINT ["java", "-jar", "helloworldwincontainer.jar"]

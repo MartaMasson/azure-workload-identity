@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "akvdotnet", "akvdotnet.csproj", "{5D29093B-4FB8-4717-9839-6D42744D5A96}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5D29093B-4FB8-4717-9839-6D42744D5A96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D29093B-4FB8-4717-9839-6D42744D5A96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D29093B-4FB8-4717-9839-6D42744D5A96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D29093B-4FB8-4717-9839-6D42744D5A96}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {30CDF914-F791-44BB-8AF4-201E34D3E581}
+	EndGlobalSection
+EndGlobal

@@ -1,7 +1,10 @@
 ARG BUILDER=mcr.microsoft.com/oss/go/microsoft/golang:1.20-bullseye
-ARG BASEIMAGE=gcr.io/distroless/static:nonroot
+ARG SERVERCORE_CACHE=gcr.io/k8s-staging-e2e-test-images/windows-servercore-cache:1.0-linux-amd64-${OS_VERSION:-1809}
+#ARG SERVERCORE_CACHE=gcr.io/k8s-staging-e2e-test-images/windows-servercore-cache:1.0-linux-amd64-ltsc2022
+#ARG BASEIMAGE=mcr.microsoft.com/windows/nanoserver:${OS_VERSION:-1809}
+ARG BASEIMAGE=mcr.microsoft.com/windows/insider:10.0.17763.107_amd64
 
-FROM ${BUILDER} as builder
+FROM --platform=linux/amd64 ${BUILDER} as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -16,15 +19,14 @@ COPY main.go main.go
 COPY token_credential.go token_credential.go
 
 # Build
-ARG TARGETARCH
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} GO111MODULE=on go build -a -o msalgo .
+RUN CGO_ENABLED=0 GOOS=windows GO111MODULE=on go build -a -o msalgo.exe .
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM --platform=${TARGETPLATFORM:-linux/amd64} ${BASEIMAGE}
+FROM --platform=linux/amd64 ${SERVERCORE_CACHE} as core
+
+FROM --platform=${TARGETPLATFORM:-windows/amd64} ${BASEIMAGE}
 WORKDIR /
-COPY --from=builder /workspace/msalgo .
-# Kubernetes runAsNonRoot requires USER to be numeric
-USER 65532:65532
+COPY --from=builder /workspace/msalgo.exe .
+COPY --from=core /Windows/System32/netapi32.dll /Windows/System32/netapi32.dll
+USER ContainerAdministrator
 
-ENTRYPOINT ["/msalgo"]
+ENTRYPOINT [ "/msalgo.exe" ]

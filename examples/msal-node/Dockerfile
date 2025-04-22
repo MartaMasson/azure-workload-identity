@@ -1,15 +1,28 @@
-ARG BUILDER=mcr.microsoft.com/cbl-mariner/base/nodejs:16
-ARG BASEIMAGE=mcr.microsoft.com/mirror/gcr/distroless/nodejs-debian11:16
+#ARG BUILDER=mcr.microsoft.com/cbl-mariner/base/nodejs:16
+#ARG BASEIMAGE=mcr.microsoft.com/mirror/gcr/distroless/nodejs-debian11:16
+#ARG BASEIMAGE=mcr.microsoft.com/cbl-mariner/base/nodejs:16
 
 # ref: https://github.com/GoogleContainerTools/distroless/blob/main/examples/nodejs/Dockerfile
-FROM ${BUILDER} AS build-env
-ADD . /app
-WORKDIR /app
-RUN npm install
+#FROM ${BUILDER} AS build-env
+#ADD . /app
+#WORKDIR /app
+#RUN npm install
 
-FROM ${BASEIMAGE}
-COPY --from=build-env /app /app
-WORKDIR /app
+#FROM ${BASEIMAGE}
+#COPY --from=build-env /app /app
+#WORKDIR /app
 # Kubernetes runAsNonRoot requires USER to be numeric
-USER 65532:65532
-CMD ["index.js"]
+#USER 65532:65532
+#CMD ["index.js"]
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN ["npm", "install"]
+
+COPY . .
+
+CMD ["node", "index.js"]

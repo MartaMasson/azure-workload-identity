@@ -36,7 +36,7 @@ namespace akvdotnet
                 Console.WriteLine("Your secret is " + keyvaultSecret.Value);
 
                 // sleep and retry periodically
-                Thread.Sleep(600000);
+                //Thread.Sleep(1000);
             }
         }
     }

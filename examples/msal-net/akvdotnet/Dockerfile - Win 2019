@@ -1,0 +1,24 @@
+FROM --platform=windows/amd64 mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-ltsc2019 AS builder
+WORKDIR /app
+ADD . .
+RUN dotnet build akvdotnet.csproj && dotnet publish -c release 
+
+ARG BASEIMAGE
+FROM ${mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-ltsc2019}
+
+WORKDIR /app
+COPY --from=builder /app/bin/release/netcoreapp7.0/publish/ .
+# Kubernetes runAsNonRoot requires USER to be numeric
+USER 65532:65532
+ENTRYPOINT ["dotnet", "akvdotnet.dll"]
+
+
+#FROM mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-ltsc2019
+
+#WORKDIR /app
+
+#COPY . .
+
+RUN msbuild /p:Configuration=Release
+
+CMD ["MyApp.exe"]

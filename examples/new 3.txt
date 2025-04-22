@@ -1,0 +1,262 @@
+rg-ingress-controller-demo
+
+
+az login
+cd terraform
+terraform plan -var 'ingress-controller-demo-rg=rg-ingress-controller-demo'
+terrafom apply -var 'ingress-controller-demo-rg=rg-ingress-controller-demo'
+az aks get-credentials --name ingress-controller-demo --resource-group rg-ingress-controller-demo
+
+keyvault_name = "ingress-controller-7FRLi"
+
+cd ..
+az keyvault certificate create --vault-name ingress-controller-7FRLi -n nginx-ingress-demo-local -p @cert-policy.json
+
+export KEYVAULT_CLIENT_ID=$(az aks show --name ingress-controller-demo --resource-group rg-ingress-controller-demo --query addonProfiles.azureKeyvaultSecretsProvider.identity.clientId -o tsv)
+export KEYVAULT_TENANT_ID=$(az keyvault show --name ingress-controller-7FRLi --query properties.tenantId -o tsv)
+export KEYVAULT_NAME=ingress-controller-7FRLi
+envsubst < secret-provider-class.yaml.template | kubectl apply -f -
+
+echo $KEYVAULT_CLIENT_ID
+echo $KEYVAULT_TENANT_ID
+echo $KEYVAULT_NAME
+
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install ingress-nginx/ingress-nginx --generate-name -f nginx-ingress-settings.yaml
+
+kubectl apply -f app-deployment.yaml
+kubectl apply -f app-ingress.yaml
+
+INGRESS_IP_ADDRESS=$(kubectl get ingress helloworld-nginx-ingress-demo -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+curl -v --insecure --resolve helloworld.nginx-ingress-demo.local:443:$INGRESS_IP_ADDRESS https://helloworld.nginx-ingress-demo.local
+
+
+
+NAMESPACE=ingress-basic
+
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --create-namespace \
+  --namespace $NAMESPACE \
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz
+
+
+
+
+  az aks stop --resource-group rg-ingress-controller-demo --name ingress-controller-demo
+
+  az aks start --resource-group rg-ingress-controller-demo --name ingress-controller-demo
+
+  az aks stop --resource-group msbuild23chaos --name aksMsBuild23ChaosZoneRedundance
+
+  az aks stop --resource-group msbuild23chaos --name aksMsBuild23ChaosSingleZone
+
+
+  export RESOURCE_GROUP="teste2mmg_group"
+  export LOCATION="westcentralus"
+  export SERVICE_ACCOUNT_NAMESPACE="default"
+  export SERVICE_ACCOUNT_NAME="workload-identity-sa"
+  export SUBSCRIPTION="$(az account show --query id --output tsv)"
+  export USER_ASSIGNED_IDENTITY_NAME="myIdentity"
+  export FEDERATED_IDENTITY_CREDENTIAL_NAME="myFedIdentity"
+  export KEYVAULT_NAME="azwi-kv-tutorial-mmg"
+  export KEYVAULT_SECRET_NAME="my-secret"
+
+
+  echo $RESOURCE_GROUP
+  echo $LOCATION
+  echo $SERVICE_ACCOUNT_NAMESPACE
+  echo $SERVICE_ACCOUNT_NAME
+  echo $SUBSCRIPTION
+  echo $USER_ASSIGNED_IDENTITY_NAME
+  echo $FEDERATED_IDENTITY_CREDENTIAL_NAME
+  echo $KEYVAULT_NAME
+  echo $KEYVAULT_SECRET_NAME
+  echo $AKS_OIDC_ISSUER
+
+
+  kubectl taint nodes <node name> <taint key>=<taint value>:<taint effect>
+
+  az aks create -g "${RESOURCE_GROUP}" -n myAKSCluster --node-count 1 --enable-oidc-issuer --enable-workload-identity --generate-ssh-keys --network-plugin azure
+
+  export AKS_OIDC_ISSUER="$(az aks show -n myAKSCluster -g "${RESOURCE_GROUP}" --query "oidcIssuerProfile.issuerUrl" -otsv)"
+
+  az keyvault create --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --name "${KEYVAULT_NAME}"
+
+  {
+    "id": "/subscriptions/106664b7-f42b-419b-a1c2-952151c599ff/resourceGroups/teste2mmg_group/providers/Microsoft.KeyVault/vaults/azwi-kv-tutorial-mmg",
+    "location": "westcentralus",
+    "name": "azwi-kv-tutorial-mmg",
+    "properties": {
+      "accessPolicies": [
+        {
+          "applicationId": null,
+          "objectId": "1991dae9-ae9e-4375-a654-b2c1103e6df1",
+          "permissions": {
+            "certificates": [
+              "all"
+            ],
+            "keys": [
+              "all"
+            ],
+            "secrets": [
+              "all"
+            ],
+            "storage": [
+              "all"
+            ]
+          },
+          "tenantId": "7fcb6604-4f46-4896-a652-8d975518c698"
+        }
+      ],
+      "createMode": null,
+      "enablePurgeProtection": null,
+      "enableRbacAuthorization": null,
+      "enableSoftDelete": true,
+      "enabledForDeployment": false,
+      "enabledForDiskEncryption": null,
+      "enabledForTemplateDeployment": null,
+      "hsmPoolResourceId": null,
+      "networkAcls": null,
+      "privateEndpointConnections": null,
+      "provisioningState": "Succeeded",
+      "publicNetworkAccess": "Enabled",
+      "sku": {
+        "family": "A",
+        "name": "standard"
+      },
+      "softDeleteRetentionInDays": 90,
+      "tenantId": "7fcb6604-4f46-4896-a652-8d975518c698",
+      "vaultUri": "https://azwi-kv-tutorial-mmg.vault.azure.net/"
+    },
+    "resourceGroup": "teste2mmg_group",
+    "systemData": {
+      "createdAt": "2023-08-11T21:36:36.023000+00:00",
+      "createdBy": "marta.masson@guimafordev.onmicrosoft.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2023-08-11T21:36:36.023000+00:00",
+      "lastModifiedBy": "marta.masson@guimafordev.onmicrosoft.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  }
+
+  az keyvault secret set --vault-name "${KEYVAULT_NAME}" --name "${KEYVAULT_SECRET_NAME}" --value 'Hello!'
+
+  {
+    "attributes": {
+      "created": "2023-08-11T21:43:33+00:00",
+      "enabled": true,
+      "expires": null,
+      "notBefore": null,
+      "recoverableDays": 90,
+      "recoveryLevel": "Recoverable+Purgeable",
+      "updated": "2023-08-11T21:43:33+00:00"
+    },
+    "contentType": null,
+    "id": "https://azwi-kv-tutorial-mmg.vault.azure.net/secrets/my-secret/2613bbfd31df405fad1db8d609fd3e08",
+    "kid": null,
+    "managed": null,
+    "name": "my-secret",
+    "tags": {
+      "file-encoding": "utf-8"
+    },
+    "value": "Hello!"
+  }
+
+  az account set --subscription "${SUBSCRIPTION}"
+
+  az identity create --name "${USER_ASSIGNED_IDENTITY_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --subscription "${SUBSCRIPTION}"
+  {
+    "clientId": "318e419b-82a0-4872-871c-ba2a0ce5a6e2",
+    "id": "/subscriptions/106664b7-f42b-419b-a1c2-952151c599ff/resourcegroups/teste2mmg_group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myIdentity",
+    "location": "westcentralus",
+    "name": "myIdentity",
+    "principalId": "45e6f794-a86a-47d7-a94a-de9b11f5c010",
+    "resourceGroup": "teste2mmg_group",
+    "systemData": null,
+    "tags": {},
+    "tenantId": "7fcb6604-4f46-4896-a652-8d975518c698",
+    "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+  }
+
+  export USER_ASSIGNED_CLIENT_ID="$(az identity show --resource-group "${RESOURCE_GROUP}" --name "${USER_ASSIGNED_IDENTITY_NAME}" --query 'clientId' -otsv)"
+  
+  echo $USER_ASSIGNED_CLIENT_ID
+
+  az keyvault set-policy --name "${KEYVAULT_NAME}" --secret-permissions get --spn "${USER_ASSIGNED_CLIENT_ID}"
+
+
+  kubectl taint nodes <node name> <taint key>=<taint value>:<taint effect>
+
+  kubectl taint nodes akswpool so=win:NoSchedule
+
+  az aks nodepool update --resource-group "${RESOURCE_GROUP}" --cluster-name myAKSCluster --name wpool --node-taints so=win:NoSchedule
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    azure.workload.identity/client-id: ${USER_ASSIGNED_CLIENT_ID}
+  name: ${SERVICE_ACCOUNT_NAME}
+  namespace: ${SERVICE_ACCOUNT_NAMESPACE}
+EOF
+
+
+
+
+az identity federated-credential create --name ${FEDERATED_IDENTITY_CREDENTIAL_NAME} --identity-name ${USER_ASSIGNED_IDENTITY_NAME} --resource-group ${RESOURCE_GROUP} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${SERVICE_ACCOUNT_NAMESPACE}:${SERVICE_ACCOUNT_NAME}
+
+
+{
+  "audiences": [
+    "api://AzureADTokenExchange"
+  ],
+  "id": "/subscriptions/106664b7-f42b-419b-a1c2-952151c599ff/resourcegroups/teste2mmg_group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myIdentity/federatedIdentityCredentials/myFedIdentity",   
+  "issuer": "https://eastus.oic.prod-aks.azure.com/7fcb6604-4f46-4896-a652-8d975518c698/46a6936d-777e-464b-9f79-de3ff8e8d587/",
+  "name": "myFedIdentity",
+  "resourceGroup": "teste2mmg_group",
+  "subject": "system:serviceaccount:default:workload-identity-sa",
+  "systemData": null,
+  "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials"
+}
+
+mcr.microsoft.com/dotnet/framework/samples:aspnetapp
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: quick-start
+  namespace: ${SERVICE_ACCOUNT_NAMESPACE}
+  labels:
+    azure.workload.identity/use: "true"
+spec:
+  serviceAccountName: ${SERVICE_ACCOUNT_NAME}
+  containers:
+  - image: dotnet/core
+    name: oidc
+    env:
+    - name: KEYVAULT_URL
+      value: ${KEYVAULT_URL}
+    - name: SECRET_NAME
+      value: ${KEYVAULT_SECRET_NAME}
+  tolerations:
+  - key: "so"
+    operator: "Equal"
+    value: "win"
+    effect: "NoSchedule"    
+  nodeSelector: 
+    kubernetes.io/os: windows      
+EOF
+
+so=win:NoSchedule
+
+
+nodeSelector:
+kubernetes.io/os: linux
