@@ -2,6 +2,8 @@
 using System;
 using System.Threading;
 using Azure.Security.KeyVault.Secrets;
+using Azure.Data.AppConfiguration;
+
 // <directives>
 
 namespace akvdotnet
@@ -11,6 +13,11 @@ namespace akvdotnet
         static void Main(string[] args)
         {
             Program P = new Program();
+
+            //Retrieving permissions using workload identity
+            MyClientAssertionCredential myClientAssertionCredential = new MyClientAssertionCredential();
+
+            //key-vault
             string keyvaultURL = Environment.GetEnvironmentVariable("KEYVAULT_URL");
             if (string.IsNullOrEmpty(keyvaultURL)) {
                 Console.WriteLine("KEYVAULT_URL environment variable not set");
@@ -27,17 +34,26 @@ namespace akvdotnet
                 new Uri(keyvaultURL),
                 new MyClientAssertionCredential());
 
-            while (true)
-            {
-                Console.WriteLine($"{Environment.NewLine}START {DateTime.UtcNow} ({Environment.MachineName})");
+            Console.WriteLine($"{Environment.NewLine}START {DateTime.UtcNow} ({Environment.MachineName})");
 
-                // <getsecret>
-                var keyvaultSecret = client.GetSecret(secretName).Value;
-                Console.WriteLine("Your secret is " + keyvaultSecret.Value);
+            // <getsecret>
+            var keyvaultSecret = client.GetSecret(secretName).Value;
+            Console.WriteLine("Your secret is " + keyvaultSecret.Value);
 
-                // sleep and retry periodically
-                //Thread.Sleep(1000);
-            }
+            //app-configuration
+            string appConfigEndpoint = Environment.GetEnvironmentVariable("APPCONFIG_ENDPOINT");
+
+            // Nome da chave que você quer ler
+            string key = Environment.GetEnvironmentVariable("APPCONFIG_KEY");
+
+            // Cria um cliente de configuração
+            var clientApp = new ConfigurationClient(new Uri(appConfigEndpoint), myClientAssertionCredential);
+
+            // Lê a chave do Azure App Configuration
+            ConfigurationSetting setting = clientApp.GetConfigurationSetting(key);
+
+            // Exibe o valor da chave
+            Console.WriteLine($"Valor da chave '{key}': {setting.Value}");
         }
     }
 }
